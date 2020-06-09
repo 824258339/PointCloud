@@ -1,0 +1,17 @@
+mvn install:install-file -DgroupId=org.citydb -DartifactId=3dcitydb-impexp -Dversion=1.0 -Dpackaging=jar -Dfile=D:\point_cloud23dtiles\pcl\pcl2cesiumApp\pointcloud2cesium\lib\3dcitydb-impexp.jar
+
+mvn install:install-file -DgroupId=org.geotools -DartifactId=gt-api -Dversion=10.5 -Dpackaging=jar -Dfile=D:\point_cloud23dtiles\pcl\pcl2cesiumApp\pointcloud2cesium\lib\geotools\gt-api-10.5.jar
+
+mvn install:install-file -DgroupId=org.geotools -DartifactId=gt-epsg-hsql -Dversion=10.5 -Dpackaging=jar -Dfile=D:\point_cloud23dtiles\pcl\pcl2cesiumApp\pointcloud2cesium\lib\geotools\gt-epsg-hsql-10.5.jar
+
+mvn install:install-file -DgroupId=org.geotools -DartifactId=gt-main -Dversion=10.5 -Dpackaging=jar -Dfile=D:\point_cloud23dtiles\pcl\pcl2cesiumApp\pointcloud2cesium\lib\geotools\gt-main-10.5.jar
+
+mvn install:install-file -DgroupId=org.geotools -DartifactId=gt-opengis -Dversion=10.5 -Dpackaging=jar -Dfile=D:\point_cloud23dtiles\pcl\pcl2cesiumApp\pointcloud2cesium\lib\geotools\gt-opengis-10.5.jar
+
+mvn install:install-file -DgroupId=org.geotools -DartifactId=gt-referencing -Dversion=10.5 -Dpackaging=jar -Dfile=D:\point_cloud23dtiles\pcl\pcl2cesiumApp\pointcloud2cesium\lib\geotools\gt-referencing-10.5.jar
+
+mvn install:install-file -DgroupId=javax.media -DartifactId=jai_core -Dversion=1.1.3 -Dpackaging=jar -Dfile=D:\point_cloud23dtiles\pcl\pcl2cesiumApp\pointcloud2cesium\lib\geotools\jai_core-1.1.3.jar
+
+mvn install:install-file -DgroupId=org.geotools -DartifactId=gt-epsg-hsql -Dversion=10.5 -Dpackaging=jar -Dfile=D:\point_cloud23dtiles\pcl\pcl2cesiumApp\pointcloud2cesium\lib\geotools\gt-epsg-hsql-10.5.jar
+
+mvn install:install-file -DgroupId=org.geotools -DartifactId=gt-metadata -Dversion=10.5 -Dpackaging=jar -Dfile=D:\point_cloud23dtiles\pcl\pcl2cesiumApp\pointcloud2cesium\lib\geotools\gt-metadata-10.5.jar

@@ -1,0 +1,15 @@
+
+jni步骤
+
+1、新建java项目
+
+2、新建 HelloNative  类，带main方法
+
+3、新增native方法
+
+4、运行java application
+
+5、进入目录   F:\vsws_gitee\pcl2cesiumApp\pcl2cesiumApp\liblas\target\classes\cn\graceearth\liblas
+
+6、javah cn.graceearth.liblas.LasReader
+

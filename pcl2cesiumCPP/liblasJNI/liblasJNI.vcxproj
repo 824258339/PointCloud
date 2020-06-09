@@ -1,0 +1,184 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{AC2F33B3-1843-41D1-A42F-DB618BE24CC8}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>liblasJNI</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>F:\pcl\pcl2cesiumCPP\libs\liblasRelease_x64\include;$(IncludePath)</IncludePath>
+    <LibraryPath>F:\pcl\pcl2cesiumCPP\libs\liblasRelease_x64\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;LIBLASJNI_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)\JniUtils;$(SolutionDir)\libs\liblasRelease_x64\include;C:\local\boost_1_70_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)\libs\liblasRelease_x64\lib;C:\local\boost_1_70_0\lib64-msvc-14.1;$(SolutionDir)$(Platform)\$(Configuration)\;D:\boost_SDK\boost_1_72_0\boost;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>liblas.lib;libboost_thread-vc141-mt-x64-1_70.lib;JniUtils.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;LIBLASJNI_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;LIBLASJNI_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>D:\boost\boost_1_70_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>libboost_atomic-vc140-mt-gd-x64-1_70.lib;libboost_atomic-vc140-mt-x64-1_70.lib;libboost_chrono-vc140-mt-gd-x64-1_70.lib;libboost_chrono-vc140-mt-x64-1_70.lib;libboost_container-vc140-mt-gd-x64-1_70.lib;libboost_container-vc140-mt-x64-1_70.lib;libboost_context-vc140-mt-gd-x64-1_70.lib;libboost_context-vc140-mt-x64-1_70.lib;libboost_contract-vc140-mt-gd-x64-1_70.lib;libboost_contract-vc140-mt-x64-1_70.lib;libboost_coroutine-vc140-mt-gd-x64-1_70.lib;libboost_coroutine-vc140-mt-x64-1_70.lib;libboost_date_time-vc140-mt-gd-x64-1_70.lib;libboost_date_time-vc140-mt-x64-1_70.lib;libboost_exception-vc140-mt-gd-x64-1_70.lib;libboost_exception-vc140-mt-x64-1_70.lib;libboost_fiber-vc140-mt-gd-x64-1_70.lib;libboost_fiber-vc140-mt-x64-1_70.lib;libboost_filesystem-vc140-mt-gd-x64-1_70.lib;libboost_filesystem-vc140-mt-x64-1_70.lib;libboost_graph-vc140-mt-gd-x64-1_70.lib;libboost_graph-vc140-mt-x64-1_70.lib;libboost_iostreams-vc140-mt-gd-x64-1_70.lib;libboost_iostreams-vc140-mt-x64-1_70.lib;libboost_locale-vc140-mt-gd-x64-1_70.lib;libboost_locale-vc140-mt-x64-1_70.lib;libboost_log_setup-vc140-mt-gd-x64-1_70.lib;libboost_log_setup-vc140-mt-x64-1_70.lib;libboost_log-vc140-mt-gd-x64-1_70.lib;libboost_log-vc140-mt-x64-1_70.lib;libboost_math_c99f-vc140-mt-gd-x64-1_70.lib;libboost_math_c99f-vc140-mt-x64-1_70.lib;libboost_math_c99l-vc140-mt-gd-x64-1_70.lib;libboost_math_c99l-vc140-mt-x64-1_70.lib;libboost_math_c99-vc140-mt-gd-x64-1_70.lib;libboost_math_c99-vc140-mt-x64-1_70.lib;libboost_math_tr1f-vc140-mt-gd-x64-1_70.lib;libboost_math_tr1f-vc140-mt-x64-1_70.lib;libboost_math_tr1l-vc140-mt-gd-x64-1_70.lib;libboost_math_tr1l-vc140-mt-x64-1_70.lib;libboost_math_tr1-vc140-mt-gd-x64-1_70.lib;libboost_math_tr1-vc140-mt-x64-1_70.lib;libboost_prg_exec_monitor-vc140-mt-gd-x64-1_70.lib;libboost_prg_exec_monitor-vc140-mt-x64-1_70.lib;libboost_program_options-vc140-mt-gd-x64-1_70.lib;libboost_program_options-vc140-mt-x64-1_70.lib;libboost_python38-vc140-mt-gd-x64-1_70.lib;libboost_python38-vc140-mt-x64-1_70.lib;libboost_random-vc140-mt-gd-x64-1_70.lib;libboost_random-vc140-mt-x64-1_70.lib;libboost_regex-vc140-mt-gd-x64-1_70.lib;libboost_regex-vc140-mt-x64-1_70.lib;libboost_serialization-vc140-mt-gd-x64-1_70.lib;libboost_serialization-vc140-mt-x64-1_70.lib;libboost_stacktrace_noop-vc140-mt-gd-x64-1_70.lib;libboost_stacktrace_noop-vc140-mt-x64-1_70.lib;libboost_stacktrace_windbg_cached-vc140-mt-gd-x64-1_70.lib;libboost_stacktrace_windbg_cached-vc140-mt-x64-1_70.lib;libboost_stacktrace_windbg-vc140-mt-gd-x64-1_70.lib;libboost_stacktrace_windbg-vc140-mt-x64-1_70.lib;liblas.lib;libboost_system-vc140-mt-gd-x64-1_70.lib;libboost_system-vc140-mt-x64-1_70.lib;libboost_test_exec_monitor-vc140-mt-gd-x64-1_70.lib;libboost_test_exec_monitor-vc140-mt-x64-1_70.lib;libboost_thread-vc140-mt-gd-x64-1_70.lib;libboost_thread-vc140-mt-x64-1_70.lib;libboost_timer-vc140-mt-gd-x64-1_70.lib;libboost_timer-vc140-mt-x64-1_70.lib;libboost_type_erasure-vc140-mt-gd-x64-1_70.lib;libboost_type_erasure-vc140-mt-x64-1_70.lib;libboost_unit_test_framework-vc140-mt-gd-x64-1_70.lib;libboost_unit_test_framework-vc140-mt-x64-1_70.lib;libboost_wave-vc140-mt-gd-x64-1_70.lib;libboost_wave-vc140-mt-x64-1_70.lib;libboost_wserialization-vc140-mt-gd-x64-1_70.lib;libboost_wserialization-vc140-mt-x64-1_70.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\boost\boost_1_70_0\stage\lib</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;LIBLASJNI_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="com_orieange_liblas_LasReader.h" />
+    <ClInclude Include="jni.h" />
+    <ClInclude Include="JniHelper.h" />
+    <ClInclude Include="jni_md.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="com_orieange_liblas_LasReader.cpp" />
+    <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\JniUtils\JniUtils.vcxproj">
+      <Project>{536b013b-7ad0-471a-bee6-2d92e2a3a258}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -1,0 +1,431 @@
+/*
+ * Cesium Point Cloud Generator
+ * 
+ * Copyright 2017 - 2018
+ * Chair of Geoinformatics
+ * Technical University of Munich, Germany
+ * https://www.gis.bgu.tum.de/
+ * 
+ * The Cesium Point Cloud Generator is developed at Chair of Geoinformatics,
+ * Technical University of Munich, Germany.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *     
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package cn.graceearth.pcl2cesum.pcl2cesium;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.nio.charset.Charset;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.citydb.api.concurrent.PoolSizeAdaptationStrategy;
+import org.citydb.api.concurrent.WorkerPool;
+
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonArray;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.WriterConfig;
+import com.orieange.liblas.LasPoint;
+import com.orieange.liblas.LasReader;
+
+import de.tum.gis.tiles3d.concurrent.PntcTileCreatorFactory;
+import de.tum.gis.tiles3d.concurrent.PntcTileWork;
+import de.tum.gis.tiles3d.database.DBManager;
+import de.tum.gis.tiles3d.database.DBManagerFactory;
+import de.tum.gis.tiles3d.database.sqlite.SqliteDBManager;
+import de.tum.gis.tiles3d.generator.PntcConfig;
+import de.tum.gis.tiles3d.generator.PntcGenerationException;
+import de.tum.gis.tiles3d.model.AbstractBoundingVolume;
+import de.tum.gis.tiles3d.model.AbstractTileContent;
+import de.tum.gis.tiles3d.model.BoundingBox2D;
+import de.tum.gis.tiles3d.model.ObjectFactory;
+import de.tum.gis.tiles3d.model.PointCloudModel;
+import de.tum.gis.tiles3d.model.PointObject;
+import de.tum.gis.tiles3d.model.Refine;
+import de.tum.gis.tiles3d.model.Region;
+import de.tum.gis.tiles3d.model.Tile;
+import de.tum.gis.tiles3d.model.TileSet;
+import de.tum.gis.tiles3d.util.CoordinateConversionException;
+import de.tum.gis.tiles3d.util.FileOperator;
+import de.tum.gis.tiles3d.util.Logger;
+
+public class LASPntcGenerator {
+	final static String ENCODING = "UTF-8";
+	final static Charset CHARSET = Charset.forName(ENCODING);
+	final static String tilesFolderName = "Tiles";	
+	final static double GeometricErrorRatio = 0.02;
+	
+	private volatile boolean shouldRun = true;
+	private AtomicInteger totalNumberOfTiles;			
+	private WorkerPool<PntcTileWork> tileCreatorPool; 
+	private DBManager dbManager;
+	private PntcConfig config;
+	
+	public LASPntcGenerator(PntcConfig config, DBManagerFactory dbManagerFactory) {
+		this.config = config;
+		dbManager = dbManagerFactory.createDBManager();
+	}
+	
+	public void initDLL(List<String> dlls) {
+		
+		for(String str :dlls ) {			
+			System.loadLibrary(str);
+		}
+		
+	}
+
+	public boolean doProcess() throws PntcGenerationException {
+		String outputFolderPath = config.getOutputFolderPath();
+
+		// Logger.info("Cleaning up all files in the output folder");
+		Logger.info("清空输出目录中的所有文件.");
+		FileOperator.deleteFiles(new File(outputFolderPath));
+	
+		try {
+			// Logger.info("Creating a temporary database in the output folder.");
+			Logger.info("在输出目录中创建临时数据库.");
+			dbManager.createConnection();
+			dbManager.createDataTable();
+			if (shouldRun) {
+				// Logger.info("Reading point cloud data from source files and import into the database.");
+				Logger.info("从源文件中读取点云数据并导入数据库.");
+				readSourcePointData();
+			}
+
+							
+			if (shouldRun) {
+				// Logger.info("Creating database index. It may take a while depending on the size of input data");
+				Logger.info("创建数据库索引.根据输入数据大小，可能会花一些时间");
+				dbManager.createIndexes();	
+			} 		
+		} catch (Exception e) {		
+			// throw new PntcGenerationException("Faild to read and import source data into the local temporary database.", e);	
+			throw new PntcGenerationException("导入源数据到本地数据库失败.", e);
+		}
+		
+		BoundingBox2D globalBoundingbox;
+		try {
+			if (!shouldRun)
+				return false;
+			// Logger.info("Calculating the global boundingbox of the input point data");
+			Logger.info("计算输入数据的全局包围盒");
+			globalBoundingbox = dbManager.calculateGlobalBoundingbox();			
+		} catch (SQLException e) {
+			// throw new PntcGenerationException("Faild to calculate global boundingbox from database.", e);
+			 throw new PntcGenerationException("计算全局包围盒失败.", e);
+
+		}		
+
+		TileSet tileset = new TileSet();
+		try {
+			if (!shouldRun)
+				return false;
+			// Logger.info("Generating output file structure according to the Cesium's 3D-Tiles standard");
+			Logger.info("根据Cesium's 3D-Tiles标准生成数据结构");
+			double tileSize = config.getTileSize();			
+			tileset = generateTileset(globalBoundingbox, outputFolderPath, tileSize);
+		} catch (CoordinateConversionException e) {
+			// throw new PntcGenerationException("Faild to construct 3D-Tiles data structure.", e); 
+			throw new PntcGenerationException("构建3D-Tiles 数据结构失败.", e); 
+		}
+
+		totalNumberOfTiles = new AtomicInteger(tileset.calculateNumberOfChildrenTiles());
+		int minThreads = 2;
+		int maxThreads = Math.max(minThreads, Runtime.getRuntime().availableProcessors());		
+		
+		// Logger.info("Writing data contents to the created file folder");	
+		Logger.info("写入数据内容到创建的文件夹");
+		tileCreatorPool = new WorkerPool<PntcTileWork>(
+				"tile_creator_pool",
+				minThreads,
+				maxThreads,
+				PoolSizeAdaptationStrategy.AGGRESSIVE,
+				new PntcTileCreatorFactory(totalNumberOfTiles, dbManager, config), 300, false);
+
+		
+		tileCreatorPool.prestartCoreWorkers();
+		
+		createPointCloudModel(tileset);
+
+		try {
+			tileCreatorPool.shutdownAndWait();
+		} catch (InterruptedException e) {
+			// throw new PntcGenerationException("Failed to shutdown worker pool.", e);
+			throw new PntcGenerationException("关闭线程池失败.", e);
+		}
+		
+		try {
+			writeTileset(tileset);				
+		} catch (IOException | CoordinateConversionException e) {
+			// throw new PntcGenerationException("Faild to write 3D-Tiles data files", e); 
+			throw new PntcGenerationException("写3D-Tiles 数据文件失败", e); 
+		}		
+
+		//Logger.info("Disconnecting and dropping the temporary database"); 
+		Logger.info("断开并删除临时数据库"); 
+		dbManager.KillConnection();	
+
+		return shouldRun;
+	}	
+	
+	private void createPointCloudModel(TileSet tileset) {
+		Tile rootTile = tileset.getRoot();		
+		List<Tile> childrenTileList = rootTile.getChildren();
+		if (childrenTileList != null) {
+			if (childrenTileList.size() > 0) {				
+				Iterator<Tile> iter = childrenTileList.iterator();
+				while(iter.hasNext()) {
+					Tile childTile = iter.next();			
+					AbstractTileContent content = childTile.getContent();
+					if (content instanceof TileSet) {
+						createPointCloudModel((TileSet) content);
+					}
+					else if (content instanceof PointCloudModel) {
+						if (!shouldRun) {			
+							return;
+						}	
+						tileCreatorPool.addWork(new PntcTileWork((PointCloudModel) content));
+					}
+				}
+			}
+		}
+		tileCreatorPool.addWork(new PntcTileWork((PointCloudModel) rootTile.getContent()));
+	}
+	
+	private void readSourcePointData() throws IOException, SQLException {
+		
+		ArrayList<LasPoint> points = LasReader.read(config.getInputPath());
+		
+		List<PointObject> batchPointList = new ArrayList<PointObject>();
+		if (points == null || points.isEmpty()) {
+			return;
+		}
+		
+		for(LasPoint point : points) {
+			
+			double x = point.getX();
+			double y = point.getY();
+			double z = (point.getZ() + config.getzOffset()) * config.getZScaleFactor();
+			
+			int colorScaleFactor = 1;
+			if (config.getColorBitSize() == 16)
+				colorScaleFactor = 256;
+			
+			int r = point.getR() / colorScaleFactor;
+			int g =point.getG() / colorScaleFactor;
+			int b = point.getB() / colorScaleFactor;	
+			
+			batchPointList.add(new PointObject(x, y, z, r, g, b, config.getSrid()));
+			if (batchPointList.size() % SqliteDBManager.batchInsertionSize == 0) {
+				dbManager.importIntoDatabase(batchPointList);
+				batchPointList = new ArrayList<PointObject>();
+			}			
+		}
+		
+		dbManager.importIntoDatabase(batchPointList);	
+	}
+	
+	private TileSet generateTileset(BoundingBox2D globalBoundingbox, 
+			String outputFolderPath, double tileSize) throws CoordinateConversionException {	
+		
+		ObjectFactory objectFactory = new ObjectFactory();	
+		TileSet tileset = objectFactory.createTileset();
+		Tile rootTile = objectFactory.createTile();		
+		tileset.setAsset(objectFactory.createAssect());		
+		tileset.setPath(outputFolderPath + File.separator + "tileset.json");
+		tileset.setRoot(rootTile);			
+		
+		BoundingBox2D[][] tileBoundingboxes = globalBoundingbox.tileBoundingbox(tileSize);			
+		int rowNumber = tileBoundingboxes.length;
+		int colNumber = tileBoundingboxes[0].length;
+		int numberOfTiles = rowNumber * colNumber;	
+		
+		int maximumNumberOfChildrenTiles = 2;
+		boolean createTileset = false;
+		if (numberOfTiles > maximumNumberOfChildrenTiles * maximumNumberOfChildrenTiles) {
+			rowNumber = maximumNumberOfChildrenTiles;
+			colNumber = maximumNumberOfChildrenTiles;
+			tileBoundingboxes = globalBoundingbox.tileBoundingbox(rowNumber, colNumber);
+			createTileset = true;
+		}
+		
+		String tilesFolderPath = outputFolderPath + File.separator + tilesFolderName;
+		new File(tilesFolderPath).mkdir();	
+		List<Tile> tileList = new ArrayList<Tile>();
+		
+		for (int rowIndex = 0; rowIndex < rowNumber; rowIndex++) {
+		    for (int colIndex = 0; colIndex < colNumber; colIndex++) {	
+		    	String childTileFolderPath = tilesFolderPath + File.separator + rowIndex + "_" + colIndex;
+		    	new File(childTileFolderPath).mkdir();
+
+		    	Tile tile = objectFactory.createTile();	
+
+		    	if (createTileset) {
+			        String contentUrl = tilesFolderName + "/" + rowIndex + "_" + colIndex + "/tileset.json";
+			        TileSet childTileset = generateTileset(tileBoundingboxes[rowIndex][colIndex], childTileFolderPath, tileSize);
+			        tile.setGeometricError(childTileset.getGeometricError());
+			        tile.setContentUrl(contentUrl);
+			        tile.setContent(childTileset);
+		    	}
+		    	else {
+		    		String pntsFilename = rowIndex + "_" + colIndex + ".pnts";
+					String filePath = childTileFolderPath + File.separator + pntsFilename;
+			        String contentUrl = tilesFolderName + "/" + rowIndex + "_" + colIndex + "/" + pntsFilename;
+			        
+					PointCloudModel pointCloudModel = objectFactory.createPointCloudModel();	
+					pointCloudModel.setPath(filePath);
+					pointCloudModel.setOwnerTileBoundingBox(tileBoundingboxes[rowIndex][colIndex]);
+					pointCloudModel.setMaximumNumberOfPoints(Integer.MAX_VALUE);
+
+					tile.setContent(pointCloudModel);
+					tile.setContentUrl(contentUrl);
+					tile.setGeometricError(config.getTileSize() * GeometricErrorRatio);
+		    	}
+				tile.setRefine(Refine.REPLACE);				
+				
+				tileList.add(tile);	   
+		    }  	
+		}
+				
+		rootTile.setChildren(tileList);
+		rootTile.setGeometricError(tileList.get(0).getGeometricError() * maximumNumberOfChildrenTiles);
+		tileset.setGeometricError(tileList.get(0).getGeometricError() * maximumNumberOfChildrenTiles);
+		rootTile.setRefine(Refine.REPLACE);
+		PointCloudModel rootPointCloudModel = objectFactory.createPointCloudModel();	
+		rootPointCloudModel.setPath(outputFolderPath + File.separator + "root.pnts");
+		rootPointCloudModel.setOwnerTileBoundingBox(globalBoundingbox);
+		rootPointCloudModel.setMaximumNumberOfPoints(config.getMaxNumOfPointsPerTile());
+		rootTile.setContent(rootPointCloudModel);
+		rootTile.setContentUrl("root.pnts");
+		
+		return tileset;
+	}
+	
+	private AbstractBoundingVolume writeTileset(TileSet tileset) throws CoordinateConversionException, IOException {
+		JsonObject tilesetJS = Json.object().add("asset", Json.object().add("version", tileset.getAsset().getVersion()));
+		tilesetJS.add("geometricError", tileset.getGeometricError());
+		Tile rootTile = tileset.getRoot();
+		JsonObject rootTileJS = createTileJsonObject(rootTile);
+		if (rootTileJS == null)
+			return null;
+
+
+		
+		tilesetJS.add("root", rootTileJS);
+		
+		Writer writer = null;
+		try {
+			writer = new FileWriter(tileset.getPath());
+			tilesetJS.writeTo(writer, WriterConfig.PRETTY_PRINT);
+		} catch (IOException e) {
+			throw new IOException("Failed to write tileset to json file.", e);
+		} finally {
+			try {
+				writer.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return rootTile.getBoundingVolume();
+	}
+	
+	private JsonArray createTilesJsonArray(List<Tile> tileList)
+			throws IOException, CoordinateConversionException {
+		JsonArray childObjectArray = (JsonArray) Json.array();
+		
+		Iterator<Tile> iter = tileList.iterator();
+		while (iter.hasNext() && shouldRun) {
+			Tile tile = iter.next();			
+			JsonObject tileJS = createTileJsonObject(tile);
+			if (tileJS != null)
+				childObjectArray.add(tileJS);
+		}
+		
+		return childObjectArray;
+	}
+	
+	private JsonObject createTileJsonObject(Tile tile) 
+			throws IOException, CoordinateConversionException {
+		
+		JsonObject tileJS = Json.object();
+		
+		List<Tile> childrenTiles = tile.getChildren();
+		if (childrenTiles != null) {
+			JsonArray childrenTilesJsonArray = createTilesJsonArray(childrenTiles);
+			if (childrenTilesJsonArray == null)
+				return null;
+			tileJS.add("children", childrenTilesJsonArray);
+			tile.calculateAndUpdateBoundingVolume();
+		}
+		
+		AbstractTileContent tileContent = tile.getContent();
+		if (tileContent != null) {
+			tileJS.add("content", Json.object().add("url", tile.getContentUrl()));
+			
+			AbstractBoundingVolume boundingVolume = null;
+			if (tileContent instanceof TileSet) {
+				boundingVolume = writeTileset((TileSet) tileContent);				
+			}
+			else if (tileContent instanceof PointCloudModel) {
+				boundingVolume = ((PointCloudModel) tileContent).getOwnerTileBoundingVolume();				
+			}
+			
+			if (boundingVolume == null)
+				return null;
+			
+			tile.setBoundingVolume(boundingVolume);
+		}
+		AbstractBoundingVolume tielBoundingVolume = tile.getBoundingVolume();	
+		if (tielBoundingVolume instanceof Region) {
+			Region tileRegion = (Region) tielBoundingVolume;
+			tileJS.add("boundingVolume", Json.object().add("region", Json.array(
+					Math.toRadians(tileRegion.getMinLon()), 
+					Math.toRadians(tileRegion.getMinLat()),
+					Math.toRadians(tileRegion.getMaxLon()),
+					Math.toRadians(tileRegion.getMaxLat()),
+					tileRegion.getMinZ(),
+					tileRegion.getMaxZ())));
+		}
+		else {/* box and sphere are currently not supported...*/}
+
+		tileJS.add("geometricError", tile.getGeometricError());
+		tileJS.add("refine", tile.getRefine().value());
+
+		return tileJS;
+	}
+
+	public boolean isShouldRun() {
+		return shouldRun;
+	}
+
+	public void setShouldRun(boolean shouldRun) {
+		this.shouldRun = shouldRun;
+		if (!shouldRun && tileCreatorPool != null) {
+			tileCreatorPool.drainWorkQueue();				
+		}		
+		else {
+			if (!shouldRun)
+				dbManager.KillConnection();
+
+		}
+		
+	}
+	
+}

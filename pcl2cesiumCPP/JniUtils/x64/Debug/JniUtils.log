@@ -1,0 +1,21 @@
+﻿  stdafx.cpp
+c:\program files (x86)\microsoft sdks\windows\v7.1a\include\sal_supp.h(57): warning C4005: “__useHeader”: 宏重定义
+  d:\vs\vc\include\sal.h(2866): note: 参见“__useHeader”的前一个定义
+c:\program files (x86)\microsoft sdks\windows\v7.1a\include\specstrings_supp.h(77): warning C4005: “__on_failure”: 宏重定义
+  d:\vs\vc\include\sal.h(2876): note: 参见“__on_failure”的前一个定义
+  JniHelper.cpp
+c:\program files (x86)\microsoft sdks\windows\v7.1a\include\sal_supp.h(57): warning C4005: “__useHeader”: 宏重定义
+  d:\vs\vc\include\sal.h(2866): note: 参见“__useHeader”的前一个定义
+c:\program files (x86)\microsoft sdks\windows\v7.1a\include\specstrings_supp.h(77): warning C4005: “__on_failure”: 宏重定义
+  d:\vs\vc\include\sal.h(2876): note: 参见“__on_failure”的前一个定义
+f:\pcl\pcl2cesiumcpp\jniutils\jnihelper.cpp(22): warning C4267: “参数”: 从“size_t”转换到“jsize”，可能丢失数据
+f:\pcl\pcl2cesiumcpp\jniutils\jnihelper.cpp(24): warning C4267: “参数”: 从“size_t”转换到“jsize”，可能丢失数据
+  dllmain.cpp
+c:\program files (x86)\microsoft sdks\windows\v7.1a\include\sal_supp.h(57): warning C4005: “__useHeader”: 宏重定义
+  d:\vs\vc\include\sal.h(2866): note: 参见“__useHeader”的前一个定义
+c:\program files (x86)\microsoft sdks\windows\v7.1a\include\specstrings_supp.h(77): warning C4005: “__on_failure”: 宏重定义
+  d:\vs\vc\include\sal.h(2876): note: 参见“__on_failure”的前一个定义
+  正在生成代码...
+    正在创建库 F:\pcl\pcl2cesiumCPP\x64\Debug\JniUtils.lib 和对象 F:\pcl\pcl2cesiumCPP\x64\Debug\JniUtils.exp
+  JniUtils.vcxproj -> F:\pcl\pcl2cesiumCPP\x64\Debug\JniUtils.dll
+  JniUtils.vcxproj -> F:\pcl\pcl2cesiumCPP\x64\Debug\JniUtils.pdb (Full PDB)

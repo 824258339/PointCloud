@@ -1,0 +1,8 @@
+﻿  stdafx.cpp
+  dllmain.cpp
+  com_orieange_liblas_LasReader.cpp
+  The use of BOOST_*_ENDIAN and BOOST_BYTE_ORDER is deprecated. Please include <boost/predef/other/endian.h> and use BOOST_ENDIAN_*_BYTE instead
+  正在生成代码...
+    正在创建库 F:\pcl\pcl2cesiumCPP\x64\Debug\liblasJNI.lib 和对象 F:\pcl\pcl2cesiumCPP\x64\Debug\liblasJNI.exp
+  liblasJNI.vcxproj -> F:\pcl\pcl2cesiumCPP\x64\Debug\liblasJNI.dll
+  liblasJNI.vcxproj -> F:\pcl\pcl2cesiumCPP\x64\Debug\liblasJNI.pdb (Full PDB)
